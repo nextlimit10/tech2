@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/nextlimit10/tech2.git'
+                git credentialsId: 'nextlimit10', branch: 'main', url: 'https://github.com/nextlimit10/tech2.git'
             }
         }
 
