@@ -1,22 +1,37 @@
-pipeline { 
-    agent any 
-    environment { 
-        AWS_REGION = 'us-west-2' 
-        ECR_REPO = '<account_id>.dkr.ecr.us-west-2.amazonaws.com/tech-challenge2-app' 
-        CLUSTER_NAME = 'my-cluster' 
-    } 
-    stages { 
-        stage('Build and Push Docker Image') { 
-            steps { 
-                sh 'docker build -t $ECR_REPO .' 
-                sh 'docker push $ECR_REPO' 
-            } 
-        } 
-        stage('Deploy to EKS') { 
-            steps { 
-                sh 'kubectl apply -f deployment.yaml' 
-                sh 'kubectl apply -f service.yaml' 
-            } 
-        } 
-    } 
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/user/repository.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t web-app .'
+                    sh 'docker tag web-app:latest <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/web-app:latest'
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                script {
+                    sh 'aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com'
+                    sh 'docker push <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/web-app:latest'
+                }
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                script {
+                    sh 'kubectl apply -f deployment.yaml'
+                }
+            }
+        }
+    }
 }
