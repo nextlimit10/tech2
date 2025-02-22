@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = '724772049461'  // Replace with actual AWS Account ID
-        AWS_REGION = 'us-west-2'         // Replace with actual AWS region
+        AWS_ACCOUNT_ID = '724772049461'  // Your actual AWS Account ID
+        AWS_REGION = 'us-west-2'         // Your AWS region
     }
 
     stages {
