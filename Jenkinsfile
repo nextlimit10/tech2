@@ -21,7 +21,7 @@ pipeline {
                 script {
                     def ecrRepo = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
                     sh 'sudo docker build -t web-app .'
-                    sh 'echo AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID AWS_REGION=$AWS_REGION'  // Debugging
+                    sh "echo AWS_ACCOUNT_ID=${env.AWS_ACCOUNT_ID} AWS_REGION=${env.AWS_REGION} ECR_REPO=${ecrRepo}"  // Debugging
                     sh "docker tag web-app:latest ${ecrRepo}:latest"
                 }
             }
