@@ -10,14 +10,17 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-credentials', branch: 'main', url: 'https://github.com/nextlimit10/tech2.git'
+                script {
+                    deleteDir()  // Clean workspace before checkout
+                    git credentialsId: 'github-credentials', branch: 'main', url: 'https://github.com/nextlimit10/tech2.git'
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t web-app .'
+                    sh 'sudo docker build -t web-app .'
                     sh 'docker tag web-app:latest $ECR_REPO:latest'
                 }
             }
