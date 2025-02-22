@@ -19,9 +19,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def ecrRepo = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
+                    def ecrRepo = "724772049461.dkr.ecr.us-west-2.amazonaws.com/web-app"
                     sh 'sudo docker build -t web-app .'
-                    sh "echo AWS_ACCOUNT_ID=${env.AWS_ACCOUNT_ID} AWS_REGION=${env.AWS_REGION} ECR_REPO=${ecrRepo}"  // Debugging
+                    sh "echo AWS_ACCOUNT_ID=724772049461 AWS_REGION=us-west-2 ECR_REPO=${ecrRepo}"  // Debugging
                     sh "docker tag web-app:latest ${ecrRepo}:latest"
                 }
             }
@@ -30,8 +30,8 @@ pipeline {
         stage('Push to ECR') {
             steps {
                 script {
-                    def ecrRepo = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
-                    sh "aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${ecrRepo}"
+                    def ecrRepo = "724772049461.dkr.ecr.us-west-2.amazonaws.com/web-app"
+                    sh "aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ecrRepo}"
                     sh "docker push ${ecrRepo}:latest"
                 }
             }
