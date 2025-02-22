@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = '<AWS_ACCOUNT_ID>'
-        AWS_REGION = '<AWS_REGION>'
+        AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')  // Retrieve from Jenkins credentials
+        AWS_REGION = credentials('AWS_REGION')
         ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/web-app"
     }
 
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     sh 'sudo docker build -t web-app .'
-                    sh 'docker tag web-app:latest $ECR_REPO:latest'
+                    sh "docker tag web-app:latest ${ECR_REPO}:latest"
                 }
             }
         }
@@ -29,8 +29,8 @@ pipeline {
         stage('Push to ECR') {
             steps {
                 script {
-                    sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                    sh 'docker push $ECR_REPO:latest'
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}"
+                    sh "docker push ${ECR_REPO}:latest"
                 }
             }
         }
