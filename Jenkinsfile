@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = '724772049461'  // Your actual AWS Account ID
-        AWS_REGION = 'us-west-2'         // Your AWS region
+        AWS_ACCOUNT_ID = '724772049461'  // ✅ Replace with your actual AWS Account ID
+        AWS_REGION = 'us-west-2'         // ✅ Replace with your actual AWS region
+        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/web-app"
     }
 
     stages {
@@ -16,29 +17,26 @@ pipeline {
             }
         }
 
-    stage('Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    def ECR_REPO = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
                     sh 'sudo docker build -t web-app .'
-                    sh "echo AWS_ACCOUNT_ID=${env.AWS_ACCOUNT_ID} AWS_REGION=${env.AWS_REGION} ECR_REPO=${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
-                    sh "docker tag web-app:latest ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app:latest"
+                    sh "echo AWS_ACCOUNT_ID=${env.AWS_ACCOUNT_ID} AWS_REGION=${env.AWS_REGION} ECR_REPO=${env.ECR_REPO}"  // Debugging
+                    sh "docker tag web-app:latest ${env.ECR_REPO}:latest"
                 }
             }
         }
 
-    stage('Push to ECR') {
+        stage('Push to ECR') {
             steps {
                 script {
-                    def ECR_REPO = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
-                    sh "aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app"
-                    sh "docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/web-app:latest"
-
+                    sh "aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${env.ECR_REPO}"
+                    sh "docker push ${env.ECR_REPO}:latest"
                 }
             }
         }
 
-    stage('Deploy to EKS') {
+        stage('Deploy to EKS') {
             steps {
                 script {
                     sh 'kubectl apply -f deployment.yaml'
